@@ -2,10 +2,13 @@ package com.alanduran.spring_recipes_app.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 @Entity
 public class Ingredient {
 
@@ -19,6 +22,15 @@ public class Ingredient {
     @ManyToOne
     private Recipe recipe;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     private UnitOfMeasure unitOfMeasure;
+
+    public Ingredient(String description, BigDecimal amount, UnitOfMeasure unitOfMeasure) {
+        this.description = description;
+        this.amount = amount;
+        this.unitOfMeasure = unitOfMeasure;
+    }
+
+    public Ingredient() {
+    }
 }

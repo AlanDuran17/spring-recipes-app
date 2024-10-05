@@ -6,5 +6,41 @@
 </head>
 <body>
     <h1>My Recipes</h1>
+
+    <table>
+        <tr>
+            <td>ID</td>
+            <td>Description</td>
+            <td>Preparation Time</td>
+            <td>Cooking Time</td>
+            <td>Source</td>
+            <td>URL</td>
+            <td>Directions</td>
+            <td>Ingredients</td>
+            <td>Notes</td>
+            <td>Difficulty</td>
+        </tr>
+        <tr th:each="recipe : ${recipes}">
+            <td th:text="${recipe.getId()}"> - </td>
+            <td th:text="${recipe.getDescription()}"> - </td>
+            <td th:text="${recipe.getPrepTime()}"> - </td>
+            <td th:text="${recipe.getCookTime()}"> - </td>
+            <td th:text="${recipe.getSource()}"> - </td>
+            <td th:text="${recipe.getUrl()}"> - </td>
+            <td style="max-width: 600px" th:text="${recipe.getDirections()}"> - </td>
+            <td style="min-width: 200px">
+                <p th:each="ingredient : ${recipe.getIngredients()}">
+                    <span th:text="${ingredient.getAmount()} + ' ' + ${ingredient.getUnitOfMeasure().getDescription()} + ' ' + ${ingredient.getDescription()} + ','"> - </span>
+                </p>
+            </td>
+            <td th:text="${recipe.getNotes().getRecipeNotes()}"> - </td>
+            <td th:text="${recipe.getDifficulty().name()}"> - </td>
+        </tr>
+    </table>
 </body>
+<style>
+    table, th, td {
+        border: 1px solid black;
+    }
+</style>
 </html>

@@ -2,8 +2,11 @@ package com.alanduran.spring_recipes_app.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Entity
 public class Notes {
 
@@ -16,4 +19,11 @@ public class Notes {
 
     @Lob
     private String recipeNotes;
+
+    public Notes() {}
+
+    public Notes(Recipe recipe, String recipeNotes) {
+        this.recipe = recipe;
+        this.recipeNotes = recipeNotes;
+    }
 }
