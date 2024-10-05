@@ -3,44 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </head>
 <body>
-    <h1>My Recipes</h1>
+    <div class="container-fluid">
+        <h1>My Recipes</h1>
 
-    <table>
-        <tr>
-            <td>ID</td>
-            <td>Description</td>
-            <td>Preparation Time</td>
-            <td>Cooking Time</td>
-            <td>Source</td>
-            <td>URL</td>
-            <td>Directions</td>
-            <td>Ingredients</td>
-            <td>Notes</td>
-            <td>Difficulty</td>
-        </tr>
-        <tr th:each="recipe : ${recipes}">
-            <td th:text="${recipe.getId()}"> - </td>
-            <td th:text="${recipe.getDescription()}"> - </td>
-            <td th:text="${recipe.getPrepTime()}"> - </td>
-            <td th:text="${recipe.getCookTime()}"> - </td>
-            <td th:text="${recipe.getSource()}"> - </td>
-            <td th:text="${recipe.getUrl()}"> - </td>
-            <td style="max-width: 600px" th:text="${recipe.getDirections()}"> - </td>
-            <td style="min-width: 200px">
-                <p th:each="ingredient : ${recipe.getIngredients()}">
-                    <span th:text="${ingredient.getAmount()} + ' ' + ${ingredient.getUnitOfMeasure().getDescription()} + ' ' + ${ingredient.getDescription()} + ','"> - </span>
-                </p>
-            </td>
-            <td th:text="${recipe.getNotes().getRecipeNotes()}"> - </td>
-            <td th:text="${recipe.getDifficulty().name()}"> - </td>
-        </tr>
-    </table>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Recipes (Expand to see the details)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="recipe : ${recipes}">
+                    <td>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button fs-4" type="button"
+                                        data-bs-toggle="collapse"
+                                        th:attr="data-bs-target='#collapse-recipe-' + ${recipe.getId()}, aria-controls='collapse-recipe-' + ${recipe.getId()}"
+                                        aria-expanded="false"
+                                        style="font-weight: bolder">
+                                    <span th:text="${recipe.getDescription()}"> - </span>&nbsp;
+                                    <span class="fs-6 badge text-bg-secondary" th:text="${recipe.getDifficulty().name()}"> - </span>&nbsp;
+                                </button>
+                            </h2>
+                            <div th:id="'collapse-recipe-' + ${recipe.getId()}"
+                                 class="accordion-collapse collapse"
+                                 th:attr="data-bs-parent='#accordionRecipe-' + ${recipe.getId()}">
+                                <div class="accordion-body">
+                                    <p>
+                                        <strong>Recipe ID:</strong> <span th:text="${recipe.getId()}"> - </span><br>
+                                        <strong>Preparation Time:</strong> <span th:text="${recipe.getPrepTime()}"> - </span><br>
+                                        <strong>Cooking Time:</strong> <span th:text="${recipe.getCookTime()}"> - </span><br>
+                                        <strong>Source:</strong> <span th:text="${recipe.getSource()}"> - </span><br>
+                                        <strong>URL:</strong> <span th:text="${recipe.getUrl()}"> - </span><br>
+                                        <strong>Directions:</strong> <span th:text="${recipe.getDirections()}"> - </span><br>
+                                        <strong>Ingredients:</strong>
+                                    </p>
+                                    <ol class="list-group list-group-numbered">
+                                        <li th:each="ingredient : ${recipe.getIngredients()}" class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div class="ms-2 me-auto">
+                                                <div class="fw-bold" th:text="${ingredient.getDescription()}">Unit</div>
+                                            </div>
+                                            <span class="badge text-bg-primary rounded-pill" th:text="${ingredient.getUnitOfMeasure().getDescription()} + ' '+ ${ingredient.getAmount()}">Amount</span>
+                                        </li>
+                                    </ol>
+                                    <div class="alert alert-warning" role="alert">
+                                        <strong>Notes:</strong> <span th:text="${recipe.getNotes().getRecipeNotes()}"> - </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </body>
-<style>
-    table, th, td {
-        border: 1px solid black;
-    }
-</style>
 </html>

@@ -2,13 +2,12 @@ package com.alanduran.spring_recipes_app.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode(exclude = {"recipe", "unitOfMeasure"})
 @Entity
 public class Ingredient {
 

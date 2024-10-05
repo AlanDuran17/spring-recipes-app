@@ -2,14 +2,13 @@ package com.alanduran.spring_recipes_app.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.EqualsAndHashCode;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode(exclude = {"notes"})
 @Entity
 public class Recipe {
 
@@ -42,6 +41,11 @@ public class Recipe {
             joinColumns = @JoinColumn(name = "recipe_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<Category> categories = new HashSet<>();
+
+    public void setNotes(Notes notes) {
+        notes.setRecipe(this);
+        this.notes = notes;
+    }
 
     public Recipe addIngredient(Ingredient ingredient) {
         ingredient.setRecipe(this);

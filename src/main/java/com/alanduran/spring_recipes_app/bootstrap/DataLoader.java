@@ -4,6 +4,8 @@ import com.alanduran.spring_recipes_app.domain.*;
 import com.alanduran.spring_recipes_app.repositories.CategoryRepository;
 import com.alanduran.spring_recipes_app.repositories.RecipeRepository;
 import com.alanduran.spring_recipes_app.repositories.UnitOfMeasureRepository;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
@@ -33,6 +36,7 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
     }
 
     private Recipe getGuacamoleRecipe() {
+        log.debug("Creating Guacamole Recipe");
         Recipe guacamole = new Recipe();
 
         Category mexicanCategory = categoryRepository.findByDescription("Mexican").orElseThrow(() -> new RuntimeException("Expected Category Not Found"));
@@ -68,6 +72,7 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
     }
 
     private Recipe getTacosAlPastorRecipe() {
+        log.debug("Creating Tacos al Pastor Recipe");
         Recipe tacosAlPastor = new Recipe();
 
         Category mexicanCategory = categoryRepository.findByDescription("Mexican").orElseThrow(() -> new RuntimeException("Expected Category Not Found"));
@@ -123,6 +128,7 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
 
     @Override
+    @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
         recipeRepository.saveAll(createRecipes());
     }
