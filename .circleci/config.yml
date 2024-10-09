@@ -1,49 +1,333 @@
-# Java Maven CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
-version: 2
+# This code is licensed from CircleCI to the user under the MIT license.
+# See here for details: https://circleci.com/developer/orbs/licensing
+version: 2.1
+description: |
+    Simplify common tasks for building and testing Java projects using Maven on CircleCI
+display:
+    home_url: https://maven.apache.org/
+    source_url: https://github.com/CircleCI-Public/maven-orb
+commands:
+    process_test_results:
+        description: |
+            Upload test results.
+            This will populate the Test Summary tab in the CircleCI UI. By default it will
+            look in `target/surefire-reports` (the default location for maven test results).
+            You can override where to find the test results with the path parameter.
+        parameters:
+            test_results_path:
+                default: target/surefire-reports
+                description: Specify a custom path for maven test results
+                type: string
+        steps:
+            - store_test_results:
+                path: << parameters.test_results_path >>
+    with_cache:
+        description: |
+            Run a set of steps with Maven dependencies cached.
+
+            This command will first restore a cache of maven dependencies, if one was
+            saved by a previous build. The provided `steps` parameter will then be executed, and
+            if successful, then a fresh cache will be saved, if required.
+
+            The contents of the `~/.m2/repository` directory is cached, which will substantially
+            improve build times for projects with many dependencies.
+
+            The cache-key is generated from any files named `pom.xml` that are
+            present in the `working_directory`.
+        parameters:
+            app_src_directory:
+                default: ""
+                description: Useful when the source of your maven project is nott in the root directory of your git repo. Supply the name of the directory or relative path of the directory containing your source code.
+                type: string
+            dependency_plugin_version:
+                default: 3.1.2
+                description: Specify the Maven Dependency Plugin
+                type: string
+            maven_command:
+                default: mvn
+                description: Specify a custom path for invoking maven
+                type: string
+            settings_file:
+                default: ""
+                description: Specify a custom settings file to use (optional)
+                type: string
+            steps:
+                type: steps
+            verify_dependencies:
+                default: true
+                description: Verify dependencies are valid and available from public sources
+                type: boolean
+        steps:
+            - run:
+                command: |-
+                    #!/bin/bash
+                    find . -name 'pom.xml' | sort | xargs cat > /tmp/maven_cache_seed
+                name: Generate Cache Checksum
+                working_directory: << parameters.app_src_directory >>
+            - restore_cache:
+                key: maven-{{ checksum "/tmp/maven_cache_seed" }}
+            - when:
+                condition: << parameters.verify_dependencies >>
+                steps:
+                    - run:
+                        command: |
+                            #!/bin/bash
+                            if [ -n "$PARAM_SETTINGS_FILE" ]; then
+                                set -- "$@" --settings "$PARAM_SETTINGS_FILE"
+                            fi
+
+                            set -x
+                            $PARAM_MVN_COMMAND org.apache.maven.plugins:maven-dependency-plugin:"$PARAM_DEP_PLUGIN_VER":go-offline "$@"
+                            set +x
+                        environment:
+                            PARAM_DEP_PLUGIN_VER: << parameters.dependency_plugin_version >>
+                            PARAM_MVN_COMMAND: << parameters.maven_command >>
+                            PARAM_SETTINGS_FILE: << parameters.settings_file >>
+                        name: Verify dependencies
+                        working_directory: << parameters.app_src_directory >>
+            - steps: << parameters.steps >>
+            - save_cache:
+                key: maven-{{ checksum "/tmp/maven_cache_seed" }}
+                paths:
+                    - ~/.m2/repository
+executors:
+    default:
+        description: |
+            The latest minor and patch update of the version 13 JDK image provided by CircleCI.
+        docker:
+            - image: cimg/openjdk:<<parameters.tag>>
+        parameters:
+            tag:
+                default: "13.0"
+                description: |
+                    Can be changed to any of the available tags listed on the DockerHub for this image.
+                    https://hub.docker.com/r/cimg/openjdk/tags
+                type: string
 jobs:
-  build:
-    docker:
-      # specify the version you desire here
-      #- image: circleci/openjdk:8-jdk
-      - image: cimg/openjdk:17-browsers-legacy
+    parallel_test:
+        description: |
+            Checkout, build, test, and upload test results for a Maven project spreading tests across multiple nodes
+        executor: << parameters.executor >>
+        parallelism: << parameters.parallelism >>
+        parameters:
+            app_src_directory:
+                default: ""
+                description: Useful when the source of your maven project is nott in the root directory of your git repo. Supply the name of the directory or relative path of the directory containing your source code.
+                type: string
+            command:
+                default: verify
+                description: The maven command to run.
+                type: string
+            dependency_plugin_version:
+                default: 3.1.2
+                description: Specify the Maven Dependency Plugin
+                type: string
+            executor:
+                default: default
+                description: The name of custom executor to use
+                type: executor
+            maven_command:
+                default: mvn
+                description: Specify a custom path for invoking maven
+                type: string
+            parallel_it_pattern:
+                default: '**/*IT*.java'
+                description: |
+                    This is the standard Failsafe pattern, but you can override
+                    if you use alternate <includes> patterns in your pom.xml.
+                type: string
+            parallel_test_pattern:
+                default: '**/*Test*.java'
+                description: |
+                    This is the standard Surefire pattern, but you can override
+                    if you use alternate <includes> patterns in your pom.xml
+                type: string
+            parallelism:
+                default: 2
+                description: How many nodes should testing be split across?
+                type: integer
+            settings_file:
+                default: ""
+                description: Specify a custom settings file to use (optional)
+                type: string
+            test_directory:
+                default: src/test/java
+                description: If following standard maven conventions this does not need to be changed.
+                type: string
+            test_results_path:
+                default: target/surefire-reports
+                description: The path to the test results.
+                type: string
+            verify_dependencies:
+                default: true
+                description: Verify dependencies are valid and available from public sources
+                type: boolean
+        steps:
+            - checkout
+            - run:
+                command: "#!/bin/bash\necho -e \"\\033[31m\\033[4mOrb Notes on Test Splitting\\033[0m\n        \\033[34mCaveat 1:\\033[0m  CircleCI Test Splitting uses filename by default, but JUnit reports use class names.\n        Therefore this orb uses naive translation of linux file paths to dot separated package names and strips the .java suffix.\n        \\033[34mCaveat 2:\\033[0m  Surefire and Failsafe both allow <includes> in pom configuration (which can come from parent projects).\n        These values are appended to any -DincludeFiles argument (meaning it would still run all tests on every node).\n        Therefore this orb will generate an exclusion list; a list of tests being run on the other nodes, and pass that to surefire/failsafe as an exclusion.\n        \\033[34mDebugging:\\033[0m This orb will place all files used to decide tests in .circleci/tests and export it as an artifact for inspection/debugging.\n        \"\nmkdir -p .circleci/tests/\n# generate excluded surefire tests using provided pattern\ncircleci tests glob \"$PARAM_TEST_DIR\"/\"$PARAM_TEST_PATTERN\" | \\\n    sed -e \"s#^$PARAM_TEST_DIR/\\(.*\\)\\.(java|kt)#\\1#\" | \\\n    tr \"/\" \".\" > .circleci/tests/surefire_classnames\ncircleci tests split --split-by=timings --timings-type=classname < .circleci/tests/surefire_classnames > /tmp/this_node_tests \ngrep -xvf /tmp/this_node_tests < .circleci/tests/surefire_classnames > .circleci/tests/surefire_classnames_ignore_list \n# generate excluded failsafe tests using provided pattern\ncircleci tests glob \"$PARAM_TEST_DIR\"/\"$PARAM_IT_PATTERN\" | \\\n    sed -e \"s#^$PARAM_TEST_DIR/\\(.*\\)\\.(java|kt)#\\1#\" | \\\n    tr \"/\" \".\" > .circleci/tests/failsafe_classnames\ncircleci tests split --split-by=timings --timings-type=classname < .circleci/tests/failsafe_classnames > /tmp/this_node_it_tests\ngrep -xvf /tmp/this_node_it_tests < .circleci/tests/failsafe_classnames > .circleci/tests/failsafe_classnames_ignore_list"
+                environment:
+                    PARAM_IT_PATTERN: << parameters.parallel_it_pattern >>
+                    PARAM_TEST_DIR: << parameters.test_directory >>
+                    PARAM_TEST_PATTERN: << parameters.parallel_test_pattern >>
+                name: Enable Test Splitting
+            - store_artifacts:
+                path: .circleci/tests/
+            - with_cache:
+                app_src_directory: << parameters.app_src_directory >>
+                dependency_plugin_version: << parameters.dependency_plugin_version >>
+                maven_command: << parameters.maven_command >>
+                settings_file: << parameters.settings_file >>
+                steps:
+                    - run:
+                        command: |-
+                            #!/bin/bash
 
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
+                            if [ -n "" ]; then
+                                set -- "$@" --settings "$PARAM_SETTINGS_FILE"
+                            fi
 
-    working_directory: ~/spring-recipes-app
+                            set -x
+                            "$PARAM_MVN_COMMAND" "$PARAM_COMMAND" -Dsurefire.excludesFile=.circleci/tests/surefire_classnames_ignore_list -Dfailsafe.excludesFile=.circleci/tests/failsafe_classnames_ignore_list "$@"
+                            set +x
+                        environment:
+                            PARAM_COMMAND: << parameters.command >>
+                            PARAM_MVN_COMMAND: << parameters.maven_command >>
+                            PARAM_SETTINGS_FILE: << parameters.settings_file >>
+                        name: Run Tests
+                        working_directory: << parameters.app_src_directory >>
+                verify_dependencies: << parameters.verify_dependencies >>
+            - process_test_results:
+                test_results_path: << parameters.test_results_path >>
+    test:
+        description: |
+            Checkout, build, test, and upload test results for a Maven project.
+        executor: <<parameters.executor>>
+        parameters:
+            app_src_directory:
+                default: ""
+                description: Useful when the source of your maven project is nott in the root directory of your git repo. Supply the name of the directory or relative path of the directory containing your source code.
+                type: string
+            command:
+                default: verify
+                description: The maven command to run.
+                type: string
+            dependency_plugin_version:
+                default: 3.1.2
+                description: Specify the Maven Dependency Plugin
+                type: string
+            executor:
+                default: default
+                description: The name of custom executor to use
+                type: executor
+            maven_command:
+                default: mvn
+                description: Specify a custom path for invoking maven
+                type: string
+            settings_file:
+                default: ""
+                description: Specify a custom settings file to use (optional)
+                type: string
+            test_results_path:
+                default: target/surefire-reports
+                description: The path to the test results.
+                type: string
+            verify_dependencies:
+                default: true
+                description: Verify dependencies are valid and available from public sources
+                type: boolean
+        steps:
+            - checkout
+            - with_cache:
+                app_src_directory: << parameters.app_src_directory >>
+                dependency_plugin_version: << parameters.dependency_plugin_version >>
+                maven_command: << parameters.maven_command >>
+                settings_file: << parameters.settings_file >>
+                steps:
+                    - run:
+                        command: |-
+                            #!/bin/bash
 
-    environment:
-      # Customize the JVM maximum heap limit
-      MAVEN_OPTS: -Xmx3200m
+                            if [ -n "$PARAM_SETTINGS_FILE" ]; then
+                                set -- "$@" --settings "$PARAM_SETTINGS_FILE"
+                            fi
 
-    steps:
-      - checkout
+                            set -x
+                            # shellcheck disable=SC2086
+                            $PARAM_MVN_COMMAND $PARAM_COMMAND "$@"
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - spring-recipes-app-{{ checksum "pom.xml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: mvn dependency:go-offline
-
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: spring-recipes-app-{{ checksum "pom.xml" }}
-
-      # run tests!
-      - run: mvn integration-test
-
-      - store_test_results:
-          path: target/surefire-reports
-
-      - run:
-          name: Send to CodeCov
-          command: bash <(curl -s https://codecov.io/bash)
+                            set +x
+                        environment:
+                            PARAM_COMMAND: << parameters.command >>
+                            PARAM_MVN_COMMAND: << parameters.maven_command >>
+                            PARAM_SETTINGS_FILE: << parameters.settings_file >>
+                        name: Run Tests
+                        working_directory: << parameters.app_src_directory >>
+                verify_dependencies: << parameters.verify_dependencies >>
+            - process_test_results:
+                test_results_path: << parameters.test_results_path >>
+examples:
+    custom_command:
+        description: |
+            Use parameters to run custom Maven commands. In the example below we are running maven verify with debug mode enabled.
+        usage:
+            version: "2.1"
+            orbs:
+                maven: circleci/maven@x.y
+            workflows:
+                maven_test:
+                    jobs:
+                        - maven/test:
+                            command: -X verify
+    custom_test_results_path:
+        description: |
+            If your tests results are not in the default (target/surefire-reports) directory then you could add a custom directory.
+        usage:
+            version: "2.1"
+            orbs:
+                maven: circleci/maven@x.y
+            workflows:
+                maven_test:
+                    jobs:
+                        - maven/test:
+                            test_results_path: /path/to/test/results
+    maven_test:
+        description: |
+            If you have a standard maven project, you can use this orb to run through a common maven workflow. Without any additional configuration you can build, test, and automatically have your test results uploaded to CircleCI.
+        usage:
+            version: "2.1"
+            orbs:
+                maven: circleci/maven@x.y
+            workflows:
+                maven_test:
+                    jobs:
+                        - maven/test
+    test_executor_matrix:
+        description: |
+            This example shows how to use the matrix key to launch against multiple
+            cimg/openjdk images.
+        usage:
+            version: "2.1"
+            orbs:
+                maven: circleci/maven@1.1
+            workflows:
+                maven_test:
+                    jobs:
+                        - maven/test:
+                            matrix:
+                                parameters:
+                                    executor:
+                                        - j13
+                                        - j15
+    test_with_executor:
+        description: |
+            This example shows how to define an a custom executor for the maven/test job.
+        usage:
+            version: "2.1"
+            orbs:
+                maven: circleci/maven@1.1
+            workflows:
+                maven_test:
+                    jobs:
+                        - maven/test:
+                            executor: example
