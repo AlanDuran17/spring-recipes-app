@@ -1,44 +1,49 @@
-# Usa la última versión del motor de pipeline de CircleCI
-version: 2.1
-
-# Define el job que se invocará en el workflow
+# Java Maven CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
 jobs:
   build:
-    # Especifica el entorno de ejecución, en este caso, una imagen con Maven y Java preinstalados
     docker:
-      # Usa una imagen de Maven con JDK 17.0.8
-      - image: cimg/openjdk:17-jdk
+      # specify the version you desire here
+      #- image: circleci/openjdk:8-jdk
+      - image: cimg/openjdk:17-browsers-legacy
 
-    # Define los pasos del job
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+    working_directory: ~/spring-recipes-app
+
+    environment:
+      # Customize the JVM maximum heap limit
+      MAVEN_OPTS: -Xmx3200m
+
     steps:
-      # Paso 1: Check out del código
       - checkout
 
-      # Paso 2: Cachear dependencias Maven para acelerar las futuras ejecuciones
+      # Download and cache dependencies
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
+            - spring-recipes-app-{{ checksum "pom.xml" }}
+            # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      # Paso 3: Ejecutar Maven para compilar el proyecto
-      - run:
-          name: "Compilar proyecto con Maven"
-          command: "mvn clean install"
+      - run: mvn dependency:go-offline
 
-      # Paso 4: Guardar dependencias en caché para futuros builds
       - save_cache:
           paths:
             - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
+          key: spring-recipes-app-{{ checksum "pom.xml" }}
 
-      # Paso 5: Guardar los artefactos de compilación si lo deseas (opcional)
-      - store_artifacts:
-          path: target
-          destination: maven-artifacts
+      # run tests!
+      - run: mvn integration-test
 
-# Define el workflow
-workflows:
-  version: 2
-  build_and_test:
-    jobs:
-      - build
+      - store_test_results:
+          path: target/surefire-reports
+
+      - run:
+          name: Send to CodeCov
+          command: bash <(curl -s https://codecov.io/bash)
