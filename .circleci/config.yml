@@ -1,16 +1,22 @@
 version: 2.1
-orbs:
-  maven: circleci/maven@1.4.1
-  slack: circleci/slack@4.4.4
-  docker: circleci/docker@2.2.0
 
-workflows:
-  maven:
-    jobs:
-      - maven/test:
-          executor: 
-            name: maven/default
-            tag: '17.0'
-          maven_command: mvn
-          command: clean install
-          verify_dependencies: false
+jobs:
+  build:
+    docker:
+      - image: cimg/openjdk:17.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - maven-{{ checksum "pom.xml" }}
+            - maven-
+      - run:
+          name: Install Maven
+          command: apt-get update && apt-get install -y maven
+      - run:
+          name: Run mvn clean install
+          command: mvn clean install
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-{{ checksum "pom.xml" }}
