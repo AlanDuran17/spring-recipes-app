@@ -3,12 +3,14 @@ package com.alanduran.spring_recipes_app.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.Set;
 
 @Entity
 @Data
 @EqualsAndHashCode(exclude = {"recipes"})
+@ToString(exclude = {"recipes"})
 public class Category {
 
     @Id

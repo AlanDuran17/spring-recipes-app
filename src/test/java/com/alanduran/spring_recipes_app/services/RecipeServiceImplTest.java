@@ -2,7 +2,6 @@ package com.alanduran.spring_recipes_app.services;
 
 import com.alanduran.spring_recipes_app.domain.Recipe;
 import com.alanduran.spring_recipes_app.repositories.RecipeRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,5 +42,19 @@ class RecipeServiceImplTest {
         assertEquals(expected.size(), actual.size());
         assertEquals(expected, actual);
         verify(recipeRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void findById() {
+        Recipe expected = new Recipe();
+        expected.setId(1L);
+
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(expected));
+
+        Recipe actual = recipeService.findById(1L);
+
+        assertEquals(expected, actual);
+        verify(recipeRepository, times(1)).findById(anyLong());
+        verify(recipeRepository, never()).findAll();
     }
 }

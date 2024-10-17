@@ -84,4 +84,16 @@ class IndexControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"));
     }
+
+    @Test
+    void testShowRecipeById() throws Exception {
+        Recipe recipe = new Recipe();
+        recipe.setId(1L);
+
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(indexController).build();
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/recipe/show/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(view().name("recipe/show"));
+    }
 }

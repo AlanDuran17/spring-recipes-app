@@ -76,7 +76,10 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         Recipe tacosAlPastor = new Recipe();
 
         Category mexicanCategory = categoryRepository.findByDescription("Mexican").orElseThrow(() -> new RuntimeException("Expected Category Not Found"));
+        Category fastFoodCategory = categoryRepository.findByDescription("Fast Food").orElseThrow(() -> new RuntimeException("Expected Category Not Found"));
+
         tacosAlPastor.getCategories().add(mexicanCategory);
+        tacosAlPastor.getCategories().add(fastFoodCategory);
 
         tacosAlPastor.setDescription("Tacos al Pastor");
         tacosAlPastor.setDirections(

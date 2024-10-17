@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Show</title>
+    <link rel="stylesheet"
+          crossorigin="anonymous"
+          th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+
+    <script src="/webjars/jquery/3.7.1/jquery.min.js"> </script>
+
+    <script crossorigin="anonymous"
+            th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.min.js}"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <h2 class="accordion-header">
+            <span th:text="${recipe.getDescription()}"> - </span>&nbsp;
+            <span class="fs-6 badge text-bg-secondary" th:text="${recipe.getDifficulty().name()}"> - </span>&nbsp;
+        </h2>
+        <div>
+            <div th:each="category : ${recipe.getCategories()}" style="display: inline">
+                <span th:text="${category.getDescription()}" class="badge text-bg-primary">Primary</span>
+            </div>
+
+            <table class="table">
+                <tbody>
+                <tr>
+                    <td class="col-sm-3"><strong>Preparation Time:</strong></td>
+                    <td class="col-sm-3"><span th:text="${recipe.getPrepTime()}"></span></td>
+                    <td class="col-sm-3"><strong>Cooking Time:</strong></td>
+                    <td class="col-sm-3"><span th:text="${recipe.getCookTime()}"></span></td>
+                </tr>
+                <tr>
+                    <td class="col-sm-3"><strong>Source:</strong></td>
+                    <td class="col-sm-3"><span th:text="${recipe.getSource()}"></span></td>
+                    <td class="col-sm-3"><strong>URL:</strong></td>
+                    <td class="col-sm-3"><span th:text="${recipe.getUrl()}"></span></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <h4>Directions:</h4>
+            <ol class="list-group" style="padding-bottom: 20px">
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <span th:text="${recipe.getDirections()}"> - </span>
+                </li>
+            </ol>
+
+            <h4>Ingredients:</h4>
+
+            <ol class="list-group list-group-numbered" style="padding-bottom: 20px">
+                <li th:each="ingredient : ${recipe.getIngredients()}" class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold" th:text="${ingredient.getDescription()}">Item</div>
+                        <span th:text="${ingredient.getAmount()} + ' '+ ${ingredient.getUnitOfMeasure().getDescription()}">Amount</span>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="alert alert-warning" role="alert">
+                <strong>Notes:</strong> <span th:text="${recipe.getNotes().getRecipeNotes()}"> - </span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
