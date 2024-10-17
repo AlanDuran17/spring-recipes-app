@@ -13,12 +13,14 @@
             th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.min.js}"></script>
 </head>
 <body>
-<!--/*@thymesVar id="recipe" type="guru.springframework.domain.Recipe"*/-->
+<!--/*@thymesVar id="recipe" type="guru.springframework.domain.RecipeCommand"*/-->
 <div class="container-fluid" style="margin-top: 20px">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
             <form  th:object="${recipe}" th:action="@{/recipe}"  method="post">
                 <input type="hidden" th:field="*{id}"/>
+                <input type="hidden" th:field="*{notes.id}"/>
+
                 <div class="pannel-group">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
@@ -104,7 +106,7 @@
                                         <li th:remove="all">1 Teaspoon of chocolate</li>
                                         <li th:each="ingredient : ${recipe.ingredients}"
                                             th:text="${(ingredient.getAmount() +
-                                        ' ' + ingredient.uom.getDescription() +
+                                        ' ' + ingredient.getUnitOfMeasure().getDescription() +
                                         ' - ' + ingredient.getDescription())}">1 Teaspoon of Sugar
                                         </li>
                                     </ul>

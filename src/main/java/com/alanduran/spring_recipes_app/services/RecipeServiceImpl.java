@@ -5,6 +5,7 @@ import com.alanduran.spring_recipes_app.converters.RecipeCommandToRecipe;
 import com.alanduran.spring_recipes_app.converters.RecipeToRecipeCommand;
 import com.alanduran.spring_recipes_app.domain.Recipe;
 import com.alanduran.spring_recipes_app.repositories.RecipeRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,9 +38,18 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe findById(Long id) {
-        log.debug("Getting recipe by ID");
-        Optional<Recipe> recipe = recipeRepository.findById(id);
-        return recipe.orElse(null);
+        log.debug("Getting recipe by ID: {}", id);
+        return recipeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recipe not found for ID: " + id));
+    }
+
+    @Override
+    public RecipeCommand findCommandById(Long id) {
+        log.debug("Getting recipe command by ID: {}", id);
+
+        return recipeRepository.findById(id)
+                .map(recipeToRecipeCommand::convert)
+                .orElseThrow(() -> new EntityNotFoundException("Recipe not found for ID: " + id));
     }
 
     @Override

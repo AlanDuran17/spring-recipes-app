@@ -2,6 +2,7 @@ package com.alanduran.spring_recipes_app.converters;
 
 import com.alanduran.spring_recipes_app.command.RecipeCommand;
 import com.alanduran.spring_recipes_app.domain.Category;
+import com.alanduran.spring_recipes_app.domain.Notes;
 import com.alanduran.spring_recipes_app.domain.Recipe;
 import lombok.Synchronized;
 import org.springframework.core.convert.converter.Converter;
@@ -40,9 +41,9 @@ public class RecipeCommandToRecipe implements Converter<RecipeCommand, Recipe> {
         recipe.setServings(source.getServings());
         recipe.setSource(source.getSource());
         recipe.setUrl(source.getUrl());
-        recipe.setNotes(notesConverter.convert(source.getNotes()));
+        recipe.setNotes(source.getNotes() != null ? notesConverter.convert(source.getNotes()) : new Notes());
 
-        if (source.getCategories() != null && source.getCategories().size() > 0){
+        if (source.getCategories() != null && !source.getCategories().isEmpty()){
             recipe.setCategories(source.getCategories().stream()
                     .map(aLong -> {
                         Category category = new Category();
@@ -52,7 +53,7 @@ public class RecipeCommandToRecipe implements Converter<RecipeCommand, Recipe> {
                     .collect(Collectors.toSet()));
         }
 
-        if (source.getIngredients() != null && source.getIngredients().size() > 0){
+        if (source.getIngredients() != null && !source.getIngredients().isEmpty()){
             recipe.setIngredients(source.getIngredients().stream()
                     .map(ingredientConverter::convert)
                     .collect(Collectors.toSet()));

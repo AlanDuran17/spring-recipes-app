@@ -13,6 +13,8 @@
             th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.min.js}"></script>
 </head>
 <body>
+    <!--/*@thymesVar id="recipes" type="java.util.List"*/-->
+    <!--/*@thymesVar id="recipe" type="guru.springframework.domain.Recipe"*/-->
     <div class="container-fluid">
         <h1>My Recipes</h1>
 
@@ -58,7 +60,7 @@
                                     </table>
 
                                     <div class="text-end">
-                                        <a th:href="@{'/recipe/show/' + ${recipe.getId()}}"
+                                        <a th:href="@{'/recipe/' + ${recipe.getId()} + '/show'}"
                                            class="btn btn-primary mt-3">Details</a>
                                     </div>
                                 </div>

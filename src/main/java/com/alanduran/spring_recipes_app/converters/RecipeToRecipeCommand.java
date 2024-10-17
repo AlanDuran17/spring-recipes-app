@@ -41,12 +41,12 @@ public class RecipeToRecipeCommand implements Converter<Recipe, RecipeCommand> {
         command.setUrl(source.getUrl());
         command.setNotes(notesConverter.convert(source.getNotes()));
 
-        if (source.getCategories() != null && source.getCategories().size() > 0){
+        if (source.getCategories() != null && !source.getCategories().isEmpty()){
             source.getCategories()
                     .forEach((Category category) -> command.getCategories().add(category.getId()));
         }
 
-        if (source.getIngredients() != null && source.getIngredients().size() > 0){
+        if (source.getIngredients() != null && !source.getIngredients().isEmpty()){
             source.getIngredients()
                     .forEach(ingredient -> command.getIngredients().add(ingredientConverter.convert(ingredient)));
         }
