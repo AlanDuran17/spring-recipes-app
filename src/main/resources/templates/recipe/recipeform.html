@@ -13,10 +13,9 @@
             th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.min.js}"></script>
 </head>
 <body>
-<!--/*@thymesVar id="recipe" type="guru.springframework.domain.RecipeCommand"*/-->
 <div class="container-fluid" style="margin-top: 20px">
     <div class="row">
-        <div class="col-md-6 col-md-offset-3">
+        <div class="col-lg-6 col-lg-offset-3">
             <form  th:object="${recipe}" th:action="@{/recipe}"  method="post">
                 <input type="hidden" th:field="*{id}"/>
                 <input type="hidden" th:field="*{notes.id}"/>
@@ -28,16 +27,16 @@
                         </div>
                         <div class="panel-body">
                             <div class="row">
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-4 form-group">
                                     <label>Recipe Description:</label>
                                     <input type="text" class="form-control" th:field="*{description}"/>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-4 form-group">
                                     <label>Categories:</label>
                                 </div>
-                                <div class="col-md-9 form-group">
+                                <div class="col-md-8 form-group">
                                     <div class="radio" th:each="cat : ${categoriesList}">
                                         <label>
                                             <input type="checkbox"
@@ -50,15 +49,15 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-4 form-group">
                                     <label>Prep Time:</label>
                                     <input type="text" class="form-control" th:field="*{prepTime}"/>
                                 </div>
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-4 form-group">
                                     <label>Cooktime:</label>
                                     <input type="text" class="form-control" th:field="*{cookTime}"/>
                                 </div>
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-4 form-group">
                                     <label>Difficulty:</label>
                                     <select class="form-control" th:remove="all">
                                         <option>Easy</option>
@@ -72,15 +71,15 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-4 form-group">
                                     <label>Servings:</label>
                                     <input type="text" class="form-control" th:field="*{servings}"/>
                                 </div>
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-4 form-group">
                                     <label>Source:</label>
                                     <input type="text" class="form-control" th:field="*{source}"/>
                                 </div>
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-4 form-group">
                                     <label>URL:</label>
                                     <input type="text" class="form-control" th:field="*{url}"/>
                                 </div>
@@ -99,19 +98,14 @@
                             </div>
                         </div>
                         <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <ul>
-                                        <li th:remove="all">1 Cup of milk</li>
-                                        <li th:remove="all">1 Teaspoon of chocolate</li>
-                                        <li th:each="ingredient : ${recipe.ingredients}"
-                                            th:text="${(ingredient.getAmount() +
-                                        ' ' + ingredient.getUnitOfMeasure().getDescription() +
-                                        ' - ' + ingredient.getDescription())}">1 Teaspoon of Sugar
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
+                            <ol class="list-group list-group-numbered" style="padding-bottom: 20px">
+                                <li th:each="ingredient : ${recipe.getIngredients()}" class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold" th:text="${ingredient.getDescription()}">Item</div>
+                                        <span th:text="${ingredient.getAmount()} + ' '+ ${ingredient.getUnitOfMeasure().getDescription()}">Amount</span>
+                                    </div>
+                                </li>
+                            </ol>
                         </div>
                     </div>
                     <div class="panel panel-primary">
