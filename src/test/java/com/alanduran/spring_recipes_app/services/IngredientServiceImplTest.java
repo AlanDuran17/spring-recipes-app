@@ -1,11 +1,14 @@
 package com.alanduran.spring_recipes_app.services;
 
 import com.alanduran.spring_recipes_app.command.IngredientCommand;
+import com.alanduran.spring_recipes_app.converters.IngredientCommandToIngredient;
 import com.alanduran.spring_recipes_app.converters.IngredientToIngredientCommand;
+import com.alanduran.spring_recipes_app.converters.UnitOfMeasureCommandToUnitOfMeasure;
 import com.alanduran.spring_recipes_app.converters.UnitOfMeasureToUnitOfMeasureCommand;
 import com.alanduran.spring_recipes_app.domain.Ingredient;
 import com.alanduran.spring_recipes_app.domain.Recipe;
 import com.alanduran.spring_recipes_app.repositories.RecipeRepository;
+import com.alanduran.spring_recipes_app.repositories.UnitOfMeasureRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,21 +29,27 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class IngredientServiceImplTest {
-
-    UnitOfMeasureToUnitOfMeasureCommand unitOfMeasureToUnitOfMeasureCommand = new UnitOfMeasureToUnitOfMeasureCommand();
-
-    IngredientToIngredientCommand ingredientToIngredientCommand = new IngredientToIngredientCommand(unitOfMeasureToUnitOfMeasureCommand);;
+    IngredientToIngredientCommand ingredientToIngredientCommand;
+    IngredientCommandToIngredient ingredientCommandToIngredient;
 
     @Mock
     RecipeRepository recipeRepository;
 
+    @Mock
+    UnitOfMeasureRepository unitOfMeasureRepository;
+
     @InjectMocks
     IngredientServiceImpl ingredientService;
+
+    public IngredientServiceImplTest() {
+        this.ingredientToIngredientCommand = new IngredientToIngredientCommand(new UnitOfMeasureToUnitOfMeasureCommand());
+        this.ingredientCommandToIngredient = new IngredientCommandToIngredient(new UnitOfMeasureCommandToUnitOfMeasure());
+    }
 
     @BeforeEach
     public void setUp() {
         // Asignar manualmente la instancia real
-        ingredientService = new IngredientServiceImpl(ingredientToIngredientCommand, recipeRepository);
+        ingredientService = new IngredientServiceImpl(ingredientToIngredientCommand, ingredientCommandToIngredient, recipeRepository, unitOfMeasureRepository);
     }
 
     @Test
