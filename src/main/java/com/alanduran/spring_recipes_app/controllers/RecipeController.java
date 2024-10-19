@@ -31,7 +31,6 @@ public class RecipeController {
     public String newRecipe(Model model) {
         log.debug("Creating new recipe");
         model.addAttribute("recipe", new RecipeCommand());
-        model.addAttribute("difficultyList", Difficulty.values());
         model.addAttribute("categoriesList", categoryService.findAllCategoryCommand());
         return "recipe/recipeform";
     }
@@ -47,7 +46,6 @@ public class RecipeController {
     public String update(@PathVariable Long id, Model model) {
         log.debug("Updating recipe with id {}", id);
         model.addAttribute("recipe", recipeService.findCommandById(id));
-        model.addAttribute("difficultyList", Difficulty.values());
         model.addAttribute("categoriesList", categoryService.findAllCategoryCommand());
         return "recipe/recipeform";
     }

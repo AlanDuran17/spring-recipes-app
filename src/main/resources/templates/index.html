@@ -24,7 +24,16 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th scope="col">Recipes (Expand to see the details)</th>
+                    <th scope="row">
+                        <div class="row">
+                            <div class="col-md-6 col-lg-8">
+                                Recipes (Expand to see the details)
+                            </div>
+                            <div class="col-md-6 col-lg-4 text-end">
+                                <a class="btn btn btn-outline-primary" href="#" th:href="@{'/recipe/new'}" role="button">New</a>
+                            </div>
+                        </div>
+                    </th>
                 </tr>
             </thead>
             <tbody>

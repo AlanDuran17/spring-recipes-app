@@ -66,7 +66,7 @@
                                     </select>
 
                                     <select class="form-control" th:field="*{difficulty}">
-                                        <option th:each="diff : ${difficultyList}" th:text="${diff.name()}" th:value="${diff.name()}">Easy</option>
+                                        <option th:each="diff : ${T(com.alanduran.spring_recipes_app.domain.Difficulty).values()}" th:text="${diff.name()}" th:value="${diff.name()}">Easy</option>
                                     </select>
                                 </div>
                             </div>
