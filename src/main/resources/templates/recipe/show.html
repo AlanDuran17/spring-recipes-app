@@ -13,32 +13,46 @@
             th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.min.js}"></script>
 </head>
 <body>
-    <div class="container-fluid">
-        <h2 class="accordion-header">
-            <span th:text="${recipe.getDescription()}"> - </span>&nbsp;
-            <span class="fs-6 badge text-bg-secondary" th:text="${recipe.getDifficulty().name()}"> - </span>&nbsp;
-        </h2>
+    <div class="container-fluid p-lg-4">
         <div>
-            <div th:each="category : ${recipe.getCategories()}" style="display: inline">
-                <span th:text="${category.getDescription()}" class="badge text-bg-primary">Primary</span>
+            <div class="row">
+                <div class="col-sm-12 col-lg-10">
+                    <h2>
+                        <span th:text="${recipe.getDescription()}"> - </span>&nbsp;
+                        <span class="fs-6 badge text-bg-secondary" th:text="${recipe.getDifficulty().name()}"> - </span>&nbsp;
+                    </h2>
+                    <div th:each="category : ${recipe.getCategories()}" style="display: inline">
+                        <span th:text="${category.getDescription()}" class="badge text-bg-primary">Primary</span>
+                    </div>
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <td class="col-sm-3"><strong>Preparation Time:</strong></td>
+                            <td class="col-sm-3"><span th:text="${recipe.getPrepTime()}"></span></td>
+                            <td class="col-sm-3"><strong>Cooking Time:</strong></td>
+                            <td class="col-sm-3"><span th:text="${recipe.getCookTime()}"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="col-sm-3"><strong>Source:</strong></td>
+                            <td class="col-sm-3"><span th:text="${recipe.getSource()}"></span></td>
+                            <td class="col-sm-3"><strong>URL:</strong></td>
+                            <td class="col-sm-3"><span th:text="${recipe.getUrl()}"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="text-end">
+                        <a th:href="@{'/recipe/' + ${recipe.getId()} + '/image'}"
+                           class="btn btn-outline-primary mt-3">Update Image
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-lg-2">
+                    <img src="../../static/images/guacamole400x400WithX.jpg"
+                         th:src="@{'/recipe/' + ${recipe.id} + '/recipeimage'}"
+                         width="200" height="200">
+                </div>
             </div>
-
-            <table class="table">
-                <tbody>
-                <tr>
-                    <td class="col-sm-3"><strong>Preparation Time:</strong></td>
-                    <td class="col-sm-3"><span th:text="${recipe.getPrepTime()}"></span></td>
-                    <td class="col-sm-3"><strong>Cooking Time:</strong></td>
-                    <td class="col-sm-3"><span th:text="${recipe.getCookTime()}"></span></td>
-                </tr>
-                <tr>
-                    <td class="col-sm-3"><strong>Source:</strong></td>
-                    <td class="col-sm-3"><span th:text="${recipe.getSource()}"></span></td>
-                    <td class="col-sm-3"><strong>URL:</strong></td>
-                    <td class="col-sm-3"><span th:text="${recipe.getUrl()}"></span></td>
-                </tr>
-                </tbody>
-            </table>
 
             <h4>Directions:</h4>
             <ol class="list-group" style="padding-bottom: 20px">
