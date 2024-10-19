@@ -1,6 +1,8 @@
 package com.alanduran.spring_recipes_app.controllers;
 
 import com.alanduran.spring_recipes_app.command.IngredientCommand;
+import com.alanduran.spring_recipes_app.command.RecipeCommand;
+import com.alanduran.spring_recipes_app.command.UnitOfMeasureCommand;
 import com.alanduran.spring_recipes_app.services.IngredientService;
 import com.alanduran.spring_recipes_app.services.RecipeService;
 import com.alanduran.spring_recipes_app.services.UnitOfMeasureService;
@@ -52,9 +54,28 @@ public class IngredientController {
     public String saveOrUpdate(@ModelAttribute IngredientCommand command){
         IngredientCommand savedCommand = ingredientService.saveIngredientCommand(command);
 
-        log.debug("saved receipe id:" + savedCommand.getRecipeId());
+        log.debug("saved recipe id:" + savedCommand.getRecipeId());
         log.debug("saved ingredient id:" + savedCommand.getId());
 
         return "redirect:/recipe/" + savedCommand.getRecipeId() + "/ingredient/" + savedCommand.getId() + "/show";
+    }
+
+    @GetMapping("recipe/{recipeId}/ingredient/new")
+    public String saveIngredient(@PathVariable Long recipeId, Model model) {
+        log.debug("Creating new ingredient for Recipe Id: {}", recipeId);
+        //make sure we have a good id value
+        RecipeCommand recipeCommand = recipeService.findCommandById(Long.valueOf(recipeId));
+        //todo raise exception if null
+
+        //need to return back parent id for hidden form property
+        IngredientCommand ingredientCommand = new IngredientCommand();
+        ingredientCommand.setRecipeId(Long.valueOf(recipeId));
+        model.addAttribute("ingredient", ingredientCommand);
+
+        //init uom
+        ingredientCommand.setUnitOfMeasure(new UnitOfMeasureCommand());
+
+        model.addAttribute("uomList",  unitOfMeasureService.listAllUoms());
+        return "recipe/ingredient/ingredientform";
     }
 }

@@ -18,7 +18,12 @@
 <table class="table table-striped">
     <thead>
     <tr>
-        <th scope="col">Ingredients</th>
+        <th class="col-md-6 col-lg-8">
+            <h1 class="panel-title">Ingredients</h1>
+        </th>
+        <th class="col-md-6 col-lg-4 text-end">
+            <a class="btn btn btn-outline-primary" href="#" th:href="@{'/recipe/' + ${recipe.id} + '/ingredient/new'}" role="button">New</a>
+        </th>
     </tr>
     </thead>
     <tbody>
