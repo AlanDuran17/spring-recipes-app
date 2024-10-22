@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>404 Not Found Error</title>
+    <link rel="stylesheet"
+          crossorigin="anonymous"
+          th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+
+    <script src="/webjars/jquery/3.7.1/jquery.min.js"> </script>
+
+    <script crossorigin="anonymous"
+            th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.min.js}"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <h1>404 Not Found</h1>
+                <p th:text="${exceptionDetails.getMessage()}"></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

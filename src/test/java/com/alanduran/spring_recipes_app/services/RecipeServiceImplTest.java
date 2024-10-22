@@ -1,6 +1,7 @@
 package com.alanduran.spring_recipes_app.services;
 
 import com.alanduran.spring_recipes_app.domain.Recipe;
+import com.alanduran.spring_recipes_app.exceptions.NotFoundException;
 import com.alanduran.spring_recipes_app.repositories.RecipeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +57,13 @@ class RecipeServiceImplTest {
         assertEquals(expected, actual);
         verify(recipeRepository, times(1)).findById(anyLong());
         verify(recipeRepository, never()).findAll();
+    }
+
+    @Test
+    public void findByIdNotFound() {
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> recipeService.findById(1L));
     }
 
     @Test

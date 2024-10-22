@@ -3,6 +3,7 @@ package com.alanduran.spring_recipes_app.controllers;
 
 import com.alanduran.spring_recipes_app.command.RecipeCommand;
 import com.alanduran.spring_recipes_app.domain.Recipe;
+import com.alanduran.spring_recipes_app.exceptions.NotFoundException;
 import com.alanduran.spring_recipes_app.services.CategoryService;
 import com.alanduran.spring_recipes_app.services.RecipeService;
 import org.junit.jupiter.api.BeforeAll;
@@ -88,4 +89,20 @@ public class RecipeControllerTest {
                 .andExpect(model().attributeExists("recipe"));
     }
 
+    @Test
+    public void testGetRecipeNotFound() throws Exception {
+
+        when(recipeService.findById(anyLong())).thenThrow(NotFoundException.class);
+
+        mockMvc.perform(get("/recipe/1/show"))
+                .andExpect(status().isNotFound())
+                .andExpect(view().name("404error"));
+    }
+
+    @Test
+    public void testGetRecipeNumberFormatException() throws Exception {
+        mockMvc.perform(get("/recipe/jorge/show"))
+                .andExpect(status().isBadRequest())
+                .andExpect(view().name("400error"));
+    }
 }

@@ -2,13 +2,16 @@ package com.alanduran.spring_recipes_app.controllers;
 
 import com.alanduran.spring_recipes_app.command.RecipeCommand;
 import com.alanduran.spring_recipes_app.domain.Difficulty;
+import com.alanduran.spring_recipes_app.exceptions.NotFoundException;
 import com.alanduran.spring_recipes_app.repositories.CategoryRepository;
 import com.alanduran.spring_recipes_app.services.CategoryService;
 import com.alanduran.spring_recipes_app.services.RecipeService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 @Slf4j
 @Controller
@@ -57,5 +60,23 @@ public class RecipeController {
         return "redirect:/";
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NotFoundException.class)
+    public ModelAndView handleNotFound(Exception exception) {
+        log.error("Handling not found exception");
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("404error");
+        modelAndView.addObject("exceptionDetails", exception);
+        return modelAndView;
+    }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NumberFormatException.class)
+    public ModelAndView handleNumberFormatException(Exception exception) {
+        log.error("Handling number format exception");
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("400error");
+        modelAndView.addObject("exceptionDetails", exception);
+        return modelAndView;
+    }
 }
