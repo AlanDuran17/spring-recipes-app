@@ -6,10 +6,12 @@ import com.alanduran.spring_recipes_app.exceptions.NotFoundException;
 import com.alanduran.spring_recipes_app.repositories.CategoryRepository;
 import com.alanduran.spring_recipes_app.services.CategoryService;
 import com.alanduran.spring_recipes_app.services.RecipeService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -18,6 +20,8 @@ import org.springframework.web.servlet.ModelAndView;
 public class RecipeController {
     private final RecipeService recipeService;
     private final CategoryService categoryService;
+
+    private static final String RECIPE_RECIPEFORM_URL = "recipe/recipeform";
 
     public RecipeController(RecipeService recipeService, CategoryService categoryService) {
         this.recipeService = recipeService;
@@ -35,12 +39,21 @@ public class RecipeController {
         log.debug("Creating new recipe");
         model.addAttribute("recipe", new RecipeCommand());
         model.addAttribute("categoriesList", categoryService.findAllCategoryCommand());
-        return "recipe/recipeform";
+        return RECIPE_RECIPEFORM_URL;
     }
 
     @PostMapping("recipe")
-    public String saveOrUpdate(@ModelAttribute RecipeCommand command){
+    public String saveOrUpdate(@Valid @ModelAttribute("recipe") RecipeCommand command, BindingResult bindingResult, Model model){
         log.debug("Saving new recipe");
+
+        if(bindingResult.hasErrors()){
+            model.addAttribute("categoriesList", categoryService.findAllCategoryCommand());
+            bindingResult.getAllErrors().forEach(objectError -> {
+                log.debug(objectError.toString());
+            });
+            return RECIPE_RECIPEFORM_URL;
+        }
+
         RecipeCommand savedCommand = recipeService.saveRecipeCommand(command);
         return "redirect:/recipe/" + savedCommand.getId() + "/show";
     }
@@ -50,7 +63,7 @@ public class RecipeController {
         log.debug("Updating recipe with id {}", id);
         model.addAttribute("recipe", recipeService.findCommandById(id));
         model.addAttribute("categoriesList", categoryService.findAllCategoryCommand());
-        return "recipe/recipeform";
+        return RECIPE_RECIPEFORM_URL;
     }
 
     @GetMapping("recipe/{id}/delete")
@@ -66,16 +79,6 @@ public class RecipeController {
         log.error("Handling not found exception");
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("404error");
-        modelAndView.addObject("exceptionDetails", exception);
-        return modelAndView;
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(NumberFormatException.class)
-    public ModelAndView handleNumberFormatException(Exception exception) {
-        log.error("Handling number format exception");
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("400error");
         modelAndView.addObject("exceptionDetails", exception);
         return modelAndView;
     }
