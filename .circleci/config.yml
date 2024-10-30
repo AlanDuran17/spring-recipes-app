@@ -1,6 +1,9 @@
 # Use the latest 2.1 version of CircleCI pipeline process engine.
 version: 2.1
 
+orbs:
+  codecov: codecov/codecov@4.0.1
+
 jobs:
   build-and-test:
     docker:
@@ -13,13 +16,13 @@ jobs:
       - run:
           name: Test
           command: mvn test
-orbs:
-  codecov: codecov/codecov@4.0.1
+      - run:
+          name: Generate Coverage Report
+          command: mvn jacoco:report
+      - codecov/upload:
+          file: target/site/jacoco/jacoco.xml
+
 workflows:
   build-and-test:
     jobs:
       - build-and-test
-  upload-to-codecov:
-    jobs:
-      - checkout
-      - codecov/upload
